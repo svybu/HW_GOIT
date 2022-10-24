@@ -65,7 +65,6 @@ def main(way):
 if __name__ == "__main__":
     main(way)
 
-move_this('D:\хай буде може\розібрати')
 
 
 
