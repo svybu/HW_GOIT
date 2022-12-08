@@ -11,15 +11,16 @@ def input_error(func):
             return exception.args[0]
         except IndexError:
             return 'This contact exists already, try again'
-        except TypeError:
+        except TypeError as exception:
             return "Sorry, I didn't understand this command, please try again"
-
     return inner
 
 
 @input_error
 def add_contact(args):
     name, phone = args
+    if name in contacts.keys():
+        raise ValueError('This contact is in memory')
     contacts[name] = phone
     return f'{name} added as contact'
 
@@ -27,7 +28,8 @@ def add_contact(args):
 @input_error
 def change_contact(args):
     name, phone = args
-    contacts[name] = phone
+    if name in contacts.keys():
+        contacts[name] = phone
     return f'{name} phone changed to {phone}'
 
 
@@ -44,6 +46,9 @@ def show_all(a):
     for name, phone in contacts.items():
         result_string = result_string + name + " phone is " + phone + '\n'
     return result_string
+
+def wrong_command():
+    return 'Wrong command('
 
 
 @input_error
@@ -63,32 +68,35 @@ HANDLERS = {"hello": hello,
             'good bye': exit,
             'close': exit,
             'exit': exit,
-            '.': exit
+            '.': exit,
+            'костиль':wrong_command
             }
 
 
 @input_error
 def parser_string(u_input):
     command, *args = u_input.split()
-    if len(args) > 0:
+    if args:
         if ((command + ' ' + args[0]).lower()) in ['show all', 'good bye']:
             command = (command + ' ' + args[0]).lower()
-        handler = HANDLERS[command.lower()]
+        handler = HANDLERS.get(command.lower(), wrong_command())
     else:
-        handler = HANDLERS[command.lower()]
+        handler = HANDLERS.get(command.lower(), wrong_command())
     return handler, args
 
-
-# @input_error
+@input_error
 def main():
     while True:
         u_input = input('Enter command ')
         handler, *args = parser_string(u_input)
-        result = handler(*args)
-        if result == exit(''):
+        if handler == wrong_command():
+            result = handler
+        elif handler == exit(''):
             print("Good bye!")
             break
-        print(result)
+        else:
+            result = handler(*args)
+            print(result)
 
 
 if __name__ == '__main__':
