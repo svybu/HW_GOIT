@@ -90,8 +90,8 @@ def main():
         u_input = input('Enter command ')
         handler, *args = parser_string(u_input)
         if handler == wrong_command():
-            result = handler
-        elif handler == exit(''):
+            print(handler)
+        elif handler == exit:
             print("Good bye!")
             break
         else:
