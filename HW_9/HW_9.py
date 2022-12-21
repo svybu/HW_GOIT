@@ -1,4 +1,4 @@
-
+contacts = {}
 def input_error(func):
     def inner(*args, **kwargs):
         try:
