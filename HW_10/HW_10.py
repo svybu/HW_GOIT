@@ -41,8 +41,9 @@ class Record():
         self.phone.remove(phone)
 
     @input_error
-    def change_phone(self, phone, new_phone):
-        self.phone[self.phone.index(phone)] = new_phone
+    def change_phone(self, new_phone):
+        self.phone.clear()
+        self.phone.append(Phone(Phone(new_phone)))
 
 
 class Field():
@@ -81,11 +82,10 @@ def input_error(func):
 @input_error
 def add_contact(args):
     name, phone = args
+    if name in contacts.keys():
+        raise ValueError('This contact is in memory')
     record = Record(name, phone)
     contacts.add_record(record)
-    """if name in contacts.keys():
-        raise ValueError('This contact is in memory')
-    contacts[name] = phone"""
     return f'{name} added as contact'
 
 
@@ -93,7 +93,7 @@ def add_contact(args):
 def change_contact(args):
     name, phone = args
     if name in contacts.keys():
-        contacts[name] = phone
+        contacts[name].change_phone(phone)
     return f'{name} phone changed to {phone}'
 
 
@@ -131,7 +131,6 @@ def exit(a):
 HANDLERS = {"hello": hello,
             "add": add_contact,
             'change': change_contact,
-            'remove': Record.remove_phone,
             'phone': show_chosen,
             'show all': show_all,
             'good bye': exit,
