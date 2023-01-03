@@ -3,15 +3,21 @@ class Point:
         self.__x = x
         self.__y = y
 
-    @x.setter
-    def x(self, x):
+    @property
+    def x(self):
         return self.__x
 
     @property
     def y(self):
         return self.__y
 
+    @x.setter
+    def x(self, new_value):
+        self.__x = new_value
 
+    @y.setter
+    def y(self, new_value):
+        self.__y = new_value
 
 
 
