@@ -24,26 +24,29 @@ class Filemover():
         files_to_move = []
         for type, ext in all_of.items():
             exts = [f"*.{e.lower()}" for e in ext] + [f"*.{e.upper()}" for e in ext]
-            files = [f for ext in exts for f in Path(self.way).rglob(ext)]
+            files = [f for ext in exts for f in Path(self.path).rglob(ext)]
             if files:
                 files_to_move.extend(files)
         return files_to_move
 
-    def get_file_type(file_path):
-        ext = os.path.splitext(file_path)[1]
-        if ext:
-            return ext[1:].upper()
-        else:
-            return None
+    def move_files(self):
+        all_of = {'images': ['JPEG', 'PNG', 'JPG', 'SVG'],
+                  'documents': ['DOC', 'DOCX', 'TXT', 'PDF', 'XLSX', 'PPTX'],
+                  'audio': ['MP3', 'OGG', 'WAV', 'AMR'],
+                  'archives': ['ZIP', 'GZ', 'TAR']
+                  }
+        files_to_move = self.get_files_to_move()
+        for file_type in all_of.keys():
+            files = []
+            for ext in all_of[file_type]:
+                exts = [f"*.{e.lower()}" for e in ext] + [f"*.{e.upper()}" for e in ext]
+                files.extend([f for ext in exts for f in Path(self.path).rglob(ext)])
+            dest = os.path.join(self.path, file_type)
+            for f in files:
+                name = normalize(f.name)
+                shutil.move(str(f), os.path.join(dest, name))
 
-    def move_files(self, files_to_move):
-        for f in files_to_move:
-            name = normalize(f.name)
-            dest = os.path.join(self.way, self.get_file_type(f))
-            os.makedirs(dest, exist_ok=True)
-            shutil.move(f, os.path.join(dest, name))
-
-        arch_path = os.path.join(self.way, 'archives')
+        arch_path = os.path.join(self.path, 'archives')
         for a in os.listdir(arch_path):
             full_path = os.path.join(arch_path, a)
             if zipfile.is_zipfile(full_path):
@@ -52,6 +55,13 @@ class Filemover():
                     zip_ref.extractall(os.path.join(arch_path, name))
                 os.remove(full_path)
 
+
+def get_file_type(file_path):
+    ext = os.path.splitext(file_path)[1]
+    if ext:
+        return ext[1:].upper()
+    else:
+        return None
 
 def normalize(name):
     CYRILLIC_SYMBOLS = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяєіїґ"
@@ -69,8 +79,8 @@ def normalize(name):
     return f"{name}{ext}"
 
 
-def del_empty_dirs(way):
-    for root, dirs, files in os.walk(way, topdown=False):
+def del_empty_dirs(path):
+    for root, dirs, files in os.walk(path, topdown=False):
         for d in dirs:
             full_path = os.path.join(root, d)
             try:
